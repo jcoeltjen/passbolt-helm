@@ -24,20 +24,44 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: DATASOURCES_DEFAULT_HOST
+            {{- if .Values.passbolt.database.host }}
+            value: {{ .Values.passbolt.database.host }}
+            {{- else }}
+            value: "{{ .Release.Name }}-mariadb"
+            {{- end }}
+          - name: DATASOURCES_DEFAULT_USERNAME
+            value: {{ .Values.passbolt.database.username }}
+          - name: DATASOURCES_DEFAULT_PASSWORD
+            value: {{ .Values.passbolt.database.password }}
+          - name: DATASOURCES_DEFAULT_DATABASE
+            value: {{ .Values.passbolt.database.name }}
+          - name: APP_FULL_BASE_URL
+            value: {{ .Values.passbolt.database.name }}
           ports:
             - name: http
               containerPort: 80
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
+            - name: https
+              containerPort: 443
+              protocol: TCP
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+        {{- if .Values.sidecar.haveged.enabled }}
+        - name: {{ .Chart.Name }}-sc-haveged
+          image: harbur/haveged:latest
+          securityContext:
+            privileged: true
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

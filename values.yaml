@@ -2,11 +2,29 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+mariadb:
+  db:
+    name: passbolt
+    user: passbolt
+    password: changeme
+
+passbolt:
+  base_url: https://passbolt.cluster.local # override
+  database:
+    name: passbolt
+    username: passbolt
+    password: changeme
+    # host: override to use external database
+
+sidecar:
+  haveged:
+    enabled: true
+
 replicaCount: 1
 
 image:
-  repository: nginx
-  tag: stable
+  repository: passbolt/passbolt
+  tag: 2.10.0-debian
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
