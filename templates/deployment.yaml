@@ -38,22 +38,26 @@ spec:
           - name: DATASOURCES_DEFAULT_DATABASE
             value: {{ .Values.passbolt.database.name }}
           - name: APP_FULL_BASE_URL
-            value: {{ .Values.passbolt.database.name }}
+            value: {{ .Values.passbolt.base_url }}
           ports:
             - name: http
               containerPort: 80
-              protocol: TCP
+              protocol: TCP      
             - name: https
               containerPort: 443
               protocol: TCP
-          # livenessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
-          # readinessProbe:
-          #   httpGet:
-          #     path: /
-          #     port: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         {{- if .Values.sidecar.haveged.enabled }}
